@@ -21,5 +21,7 @@ class Post (models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True) # Timestamp when the post was created
 
+    is_published = models.BooleanField(default=False) # New Field to check if post has been published before
+
     def __str__(self):
         return self.content[:50]
