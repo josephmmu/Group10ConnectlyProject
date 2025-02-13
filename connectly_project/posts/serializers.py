@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from .models import User, Post, Comment
+from .models import Post, Comment
+# from .models import User,
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'created_at']
+#class UserSerializer(serializers.ModelSerializer):
+#    class Meta:
+#        model = User
+#        fields = ['id', 'username', 'email', 'created_at']
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,7 +15,7 @@ class PostSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ['id', 'text', 'author', 'post', 'created_at']\
+        fields = ['id', 'text', 'author', 'post', 'created_at']
         
     def validate_post(self, value):
         if not Post.objects.filter(id=value.id).exists():

@@ -1,56 +1,136 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import User, Post, Comment
-from .serializers import UserSerializer, PostSerializer, CommentSerializer
-
 from django.shortcuts import render
-
-from django.http import JsonResponse
-
-import json
-from django.views.decorators.csrf import csrf_exempt
-
+from django.contrib.auth.models import User
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import viewsets, status
+from .models import Post, Comment
+#from .models import User
+from .serializers import PostSerializer, CommentSerializer
+#from .serializers import UserSerializer
 
 # Create your views here.
 
-class UserListCreate(APIView):
-    def get(self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
-    
-    def post(self, request):
-        serializer = UserSerializer(data = request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+def register(request):
+    if request.method == 'POST':
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = User.objects.create_user(username = username, password = password)
 
+        return Response({"message": "User created successfully!"}, status=status.HTTP_201_CREATED)
 
-class PostListCreate(APIView):
-    def get(self, request):
-        posts = Post.objects.all()
-        serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data)
+#class UserViewSet(viewsets.ModelViewSet):
+#    queryset = User.objects.all()
+#    serializer_class = UserSerializer
+
+#    def create(self, request, *args, **kwargs):
+#        serializer = self.get_serializer(data = request.data)
+#        serializer.is_valid(raise_exception = True)
+#        self.perform_create(serializer)
+#        return Response({"message": " User created successfully", "data": serializer.data}, status = status.HTTP_201_CREATED)
+#    
+#    def update(self, request, *args, **kwargs):
+#        partial = kwargs.pop('partial', False)
+##        serializer = self.get_serializer(instance, data = request.data, partial = partial)
+ #       serializer.is_valid(raise_exception = True)
+#        self.perform_update(serializer)
+#        return Response({"message": " User Updated successfully", "data": serializer.data}, status = status.HTTP_200_OK)
+
+#    def destroy(self, request, *args, **kwargs):
+#        instance = self.get_object()
+#        if instance.completed:
+#            return Response({"error": "Cannot delete the user"}, status = status.HTTP_400_BAD_REQUEST)
+#        self.perform_destroy(instance)
+#        return Response({"message": " User deleted successfully"}, status = status.HTTP_204_NO_CONTENT)
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data = request.data)
+        serializer.is_valid(raise_exception = True)
+        self.perform_create(serializer)
+        return Response({"message": " Post created successfully", "data": serializer.data}, status = status.HTTP_201_CREATED)
     
-    def post(self, request):
-        serializer = PostSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data = request.data, partial = partial)
+        serializer.is_valid(raise_exception = True)
+        self.perform_update(serializer)
+        return Response({"message": " Post Updated successfully", "data": serializer.data}, status = status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.completed:
+            return Response({"error": "Cannot delete the Post"}, status = status.HTTP_400_BAD_REQUEST)
+        self.perform_destroy(instance)
+        return Response({"message": " Post deleted successfully"}, status = status.HTTP_204_NO_CONTENT)
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data = request.data)
+        serializer.is_valid(raise_exception = True)
+        self.perform_create(serializer)
+        return Response({"message": " Comment created successfully", "data": serializer.data}, status = status.HTTP_201_CREATED)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data = request.data, partial = partial)
+        serializer.is_valid(raise_exception = True)
+        self.perform_update(serializer)
+        return Response({"message": " Comment Updated successfully", "data": serializer.data}, status = status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.completed:
+            return Response({"error": "Cannot delete the Comment"}, status = status.HTTP_400_BAD_REQUEST)
+        self.perform_destroy(instance)
+        return Response({"message": " Comment deleted successfully"}, status = status.HTTP_204_NO_CONTENT)
+    
+#class UserListCreate(APIView):
+#
+#    def get(self, request):
+#        users = User.objects.all()
+#        serializer = UserSerializer(users, many=True)
+#        return Response(serializer.data)
+#    
+#    def post(self, request):
+#        serializer = UserSerializer(data = request.data)
+#        if serializer.is_valid():
+#            serializer.save()
+#            return Response(serializer.data, status=status.HTTP_201_CREATED)
+#        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class CommentListCreate(APIView):
-    def get(self, request):
-        comments = Comment.objects.all()
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data)
+#class PostListCreate(APIView):
+#    def get(self, request):
+#        posts = Post.objects.all()
+#        serializer = PostSerializer(posts, many=True)
+#        return Response(serializer.data)
+#    
+#    def post(self, request):
+#        serializer = PostSerializer(data=request.data)
+#        if serializer.is_valid():
+#            serializer.save()
+#            return Response(serializer.data, status=status.HTTP_201_CREATED)
+#        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def post(self, request):
-        serializer = CommentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#class CommentListCreate(APIView):
+#    def get(self, request):
+#        comments = Comment.objects.all()
+#        serializer = CommentSerializer(comments, many=True)
+#        return Response(serializer.data)
+    
+#    def post(self, request):
+#        serializer = CommentSerializer(data=request.data)
+#        if serializer.is_valid():
+#            serializer.save()
+#            return Response(serializer.data, status=status.HTTP_201_CREATED)
+#        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
