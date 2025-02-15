@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -14,9 +15,9 @@ from django.db import models
 class Post (models.Model):
 
     content = models.TextField() # The text content of the post
-#    author = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE) # The user who created the post
+    author = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE, default=1) # The user who created the post
     created_at = models.DateTimeField(auto_now_add=True) # Timestamp when the post was created
-    #is_published = models.BooleanField(default=False) # New Field to check if post has been published before
+    is_published = models.BooleanField(default=False) # New Field to check if post has been published before
 
     def __str__(self):
         return f"Post by {self.author.username} at {self.created_at}"

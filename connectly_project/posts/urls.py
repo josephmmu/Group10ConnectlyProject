@@ -2,6 +2,7 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from . import views
 from .views import PostViewSet, CommentViewSet
+from rest_framework.authtoken.views import obtain_auth_token
 #from .views import UserViewSet,
 
 #urlpatterns = [
@@ -20,6 +21,12 @@ urlpatterns = [
     path('', include(router.urls)),
 
     # User registration URL
-    path ('register/', views.register, name = 'register')
+    path ('register/', views.register, name = 'register'),
+
+    # User registration URL
+    path ('get-user/', views.get_users, name = 'get-user-list'),
+
+    # Token URL
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 
 ]
