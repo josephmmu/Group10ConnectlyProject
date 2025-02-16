@@ -1,7 +1,8 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from . import views
-from .views import PostViewSet, CommentViewSet
+from .views import PostViewSet
+from .views import CommentViewSet, CreatePostView
 from rest_framework.authtoken.views import obtain_auth_token
 #from .views import UserViewSet,
 
@@ -28,5 +29,7 @@ urlpatterns = [
 
     # Token URL
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
+
+    path('create/', CreatePostView.as_view(), name = 'create-post')
 
 ]
