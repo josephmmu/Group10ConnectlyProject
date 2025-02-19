@@ -1,5 +1,5 @@
 class UserRoleFactory:
-    # Factory class for reating user role instances
+    # Factory class for creating user role instances
 
     @staticmethod
     def get_role(user):

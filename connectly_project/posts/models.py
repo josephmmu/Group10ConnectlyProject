@@ -3,15 +3,6 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
-#class User(models.Model) :
-
-#    username = models.CharField(max_length=100, unique=True) #User's unique username
-#    email = models.EmailField(unique=True) #User's unique email
-#    created_at = models.DateTimeField(auto_now_add=True) #Timestamp when the user was created
-
-#    def __str__(self):
-#        return self.username
-    
 class Post (models.Model):
 
     POST_TYPES = {
@@ -26,10 +17,6 @@ class Post (models.Model):
     content = models.TextField(blank=True, null=True)
     metadata = models.JSONField(default=dict, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    # content = models.TextField() # The text content of the post
-    # #author = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE, default=1) # The user who created the post
-    # created_at = models.DateTimeField(auto_now_add=True) # Timestamp when the post was created
-    # is_published = models.BooleanField(default=False) # New Field to check if post has been published before
 
     def __str__(self):
         return f"Post by {self.author.username} at {self.created_at}"
