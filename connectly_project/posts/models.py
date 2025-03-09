@@ -15,8 +15,12 @@ class Post (models.Model):
     post_type = models.CharField(max_length=10, choices=POST_TYPES.items(), default='text')
     title = models.CharField(max_length=255, default='defaulttitle')  # Title field added
     content = models.TextField(blank=True, null=True)
+    likes = models.ManyToManyField(User, related_name="liked_posts", blank=True)
     metadata = models.JSONField(default=dict, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def total_likes(self):
+        return self.likes.count()
 
     def __str__(self):
         return f"Post by {self.author.username} at {self.created_at}"

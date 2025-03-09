@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Posts</title>
+</head>
+<body>
+
+    {% if user.is_authenticated %}
+    <p>Welcome, {{ user.username }}!</p>
+    <a href="{% url 'logout' %}">Logout</a>
+{% else %}
+    <a href="{% url 'login' %}">Login</a>
+{% endif %}
+    <h1>Posts</h1>
+        <ul id="post-list">
+            {% for post in posts %}
+                <div class="post-header">
+                    <h2>{{ post.title }}</h2>
+                    <p> @{{post.author }}</p>
+                </div>
+                
+                <p>╔════════════════════╗</p>
+                <br>
+                <p>{{ post.content }}</p>
+                <br>
+                <p>╚════════════════════╝</p>
+
+                <br>
+
+                {{ post.title }} - {{ post.author }} ({{ post.total_likes }} Likes)
+                <a href="{% url 'post_detail' post.id %}">View Post</a>
+
+                <h3>Comments:</h3>
+                <ul>
+                    {% for comment in post.comments.all %}
+                        <li>{{ comment.author }}: {{ comment.text }}</li>
+                    {% empty %}
+                        <li>No comments yet.</li>
+                    {% endfor %}
+                </ul>
+                <p>☼ ════════════════════ ☼  </p>
+            {% endfor %}
+        </ul>
+
+        <div class="pagination">
+            {% if posts.has_previous %}
+                <a href="?page=1">First</a>
+                <a href="?page={{ posts.previous_page_number }}">Previous</a>
+            {% endif %}
+        
+            <span>Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
+        
+            {% if posts.has_next %}
+                <a href="?page={{ posts.next_page_number }}">Next</a>
+                <a href="?page={{ posts.paginator.num_pages }}">Last</a>
+            {% endif %}
+        </div>
+
+
+    <script>
+        async function fetchPosts() {
+            const response = await fetch('http://127.0.0.1:8000/posts/');
+            const posts = await response.json();
+            
+            let postsList = document.getElementById('post-list');
+            postsList.innerHTML = '';  // Clear existing data
+
+            posts.forEach(post => {  // Use 'post' instead of 'student'
+            let li = document.createElement('li');
+            li.textContent = `${post.author} - ${post.title} - ${post.content}`;
+            postsList.appendChild(li);
+    });
+        } 
+
+        fetchPosts();
+    </script>
+</body>
+</html>

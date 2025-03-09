@@ -6,13 +6,30 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password', 'is_staff', 'is_superuser']
-        extra_kwargs = {'password': {'write_only': True}} # Ensures password is not returned
+        extra_kwargs = {
+            'password': {'write_only': True},
+            } # Ensures password is not returned
 
         def create(self, validated_data):
+            request = self.context.get('request')
+
+            # Ensure request exists (prevents anonymous requests from setting staff/superuser)
+            if not request or not request.user or not request.user.is_authenticated:
+                validated_data.pop('is_staff', None)
+                validated_data.pop('is_superuser', None)
+
+            # If the user is NOT a superuser, force 'is_staff' and 'is_superuser' to False
+            if not request.user.is_superuser:
+                validated_data.pop('is_staff', None)
+                validated_data.pop('is_superuser', None)
+                
+
             user = User.objects.create_user(**validated_data)
             return user
 
 class PostSerializer(serializers.ModelSerializer):
+    author = serializers.CharField(source='author.username')    
+
     
     class Meta:
         model = Post

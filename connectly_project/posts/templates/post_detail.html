@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <h2>{{ post.title }}</h2>
+    <p>By {{ post.author }}</p>
+    <p>{{ post.content }}</p>
+
+    <!-- Like Button -->
+    <form action="{% url 'like_post' post.id %}" method="POST">
+        {% csrf_token %}
+        {% if user in post.likes.all %}
+            <button type="submit">Unlike</button>
+        {% else %}
+            <button type="submit">Like</button>
+        {% endif %}
+    </form>
+
+    <p>{{ post.total_likes }} Likes</p>
+
+    <a href="{% url 'post-list' %}">
+        <button> Back to Posts</button>
+    </a>
+
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+h2, p {
+  display: inline-block;
+  vertical-align: middle; 
+}
+
+.pagination a {
+  padding: 8px 12px;
+  text-decoration: none;
+  color: white;
+  background-color: blue;
+  margin: 5px;
+  border-radius: 5px;
+}
+.pagination span {
+  font-weight: bold;
+}

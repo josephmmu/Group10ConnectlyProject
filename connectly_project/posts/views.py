@@ -1,11 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from rest_framework import viewsets, status
 from .models import Post, Comment   
 from .serializers import UserSerializer, PostSerializer, CommentSerializer
 
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.authentication import TokenAuthentication
 
 from rest_framework.views import APIView
@@ -15,7 +16,61 @@ from .permissions import IsAuthorOrAdmin
 
 from .singletons.logger_singleton import LoggerSingleton
 
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+
+from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator
+
+# function to run gui site
+
+# List of Posts Page
+@login_required
+def post_list(request):
+    posts = Post.objects.all() #to order posts
+    paginator = Paginator(posts, 5) # Going to be showing 5 posts per page
+
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)
+
+    return render(request, 'index.html', {'posts': posts})
+
+
+def post_detail(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    return render(request, "post_detail.html", {"post": post})
+
+
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if request.user in post.likes.all():
+        post.likes.remove(request.user) # Removes the like if its already liked
+    else: 
+        post.likes.add(request.user) # Likes if its not liked yet
+        
+    return redirect("post_detail", post_id=post.id) #Redirect back to pst detail
+
 # Create your views here.
+
+#Login View
+def login_view(request):
+    if request.method == "POST":
+        form = AuthenticationForm(data = request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect("post-list")
+    else:
+        form = AuthenticationForm()
+    return render(request, "login.html", {"form": form})
+
+#Logout View
+def logout_view(request):
+    logout(request)
+    return redirect("login")
 
 #Viewset for User Managment
 class UserViewSet(viewsets.ModelViewSet):
@@ -23,6 +78,12 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthorOrAdmin]
+    
+    def get_permissions(self):
+        """ Allows anyone to create a user, but require admin for updates."""
+        if self.action == 'create':
+            return [IsAuthenticated()]
+        return [IsAdminUser()]
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()

@@ -4,11 +4,13 @@ from . import views
 from .views import PostViewSet
 from .views import UserViewSet, CommentViewSet
 from rest_framework.authtoken.views import obtain_auth_token
-#from .views import UserViewSet,
+from .views import login_view, logout_view, like_post, post_detail
+
+from .views import post_list
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename = 'user')
-router.register(r'posts', PostViewSet, basename = 'post')
+#router.register(r'posts', PostViewSet, basename = 'post')
 router.register(r'comments', CommentViewSet, basename = 'comment')
 
 urlpatterns = [
@@ -17,4 +19,14 @@ urlpatterns = [
 
     # Token URL
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
+
+    path('posts/', post_list, name="post-list"),
+
+    path('login/', login_view, name="login"),
+    path('logout/', logout_view, name="logout"),
+
+    path('post/<int:post_id>/', post_detail, name="post_detail"),
+    path('post/<int:post_id>/like/', like_post, name="like_post")
+
+
 ]
