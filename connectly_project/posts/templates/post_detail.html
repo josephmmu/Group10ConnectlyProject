@@ -8,6 +8,12 @@
 <body>
     
     <h2>{{ post.title }}</h2>
+
+    {% if user == post.author or user.is_staff %}
+    <a href="{% url 'edit_post' post.id %}">Edit</a>
+    <a href="{% url 'delete_post' post.id %}">Delete</a>
+    {% endif %}
+
     <p>By {{ post.author }}</p>
     <p>{{ post.content }}</p>
 

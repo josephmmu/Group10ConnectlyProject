@@ -1,20 +1,9 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Posts</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-    {% if user.is_authenticated %}
-    <p>Welcome, {{ user.username }}!</p>
-    <a href="{% url 'logout' %}">Logout</a>
-{% else %}
-    <a href="{% url 'login' %}">Login</a>
-{% endif %}
+    
+{% block title %}Home - My Blog{% endblock %}
+
+{% block content %}
     <h1>Posts</h1>
         <ul id="post-list">
             {% for post in posts %}
@@ -43,6 +32,8 @@
                     {% endfor %}
                 </ul>
                 <p>☼ ════════════════════ ☼  </p>
+            {% empty %}
+                <p>No posts available.</p>
             {% endfor %}
         </ul>
 
@@ -60,23 +51,5 @@
             {% endif %}
         </div>
 
-
-    <script>
-        async function fetchPosts() {
-            const response = await fetch('http://127.0.0.1:8000/posts/');
-            const posts = await response.json();
-            
-            let postsList = document.getElementById('post-list');
-            postsList.innerHTML = '';  // Clear existing data
-
-            posts.forEach(post => {  // Use 'post' instead of 'student'
-            let li = document.createElement('li');
-            li.textContent = `${post.author} - ${post.title} - ${post.content}`;
-            postsList.appendChild(li);
-    });
-        } 
-
-        fetchPosts();
-    </script>
-</body>
-</html>
+{% endblock %}
+    

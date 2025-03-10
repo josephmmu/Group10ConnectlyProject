@@ -23,6 +23,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 
+from django.core.exceptions import PermissionDenied
+from posts.forms import PostForm
+
 # function to run gui site
 
 # List of Posts Page
@@ -36,7 +39,7 @@ def post_list(request):
 
     return render(request, 'index.html', {'posts': posts})
 
-
+@login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     return render(request, "post_detail.html", {"post": post})
@@ -71,6 +74,40 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("login")
+
+# Edit Posts View
+@login_required
+def edit_posts(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    #Only allowing the author, staff, or superusers
+    if request.user != post.author and not request.user.is_staff:
+        raise PermissionDenied
+    
+    if request.method == "POST":
+        form = PostForm(request.POST, instance = post)
+        if form.is_valid():
+            form.save()
+            return redirect('post_detail', post_id = post_id)
+    else:
+        form = PostForm(instance = post)
+
+    return render(request, "edit_post.html", {"form": form, "post": post})  
+
+
+@login_required
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, id = post_id)
+
+    #Only allowing the author, staff, or superusers
+    if request.user != post.author and not request.user.is_staff:
+        raise PermissionDenied
+    
+    if request.method == "POST":
+        post.delete()
+        return redirect("post-list")
+    
+    return render(request, "delete_post.html", {"post": post})
 
 #Viewset for User Managment
 class UserViewSet(viewsets.ModelViewSet):
