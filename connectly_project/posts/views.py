@@ -89,44 +89,43 @@ def toggle_privacy(request, post_id):
 # List of Posts Page
 @login_required
 def post_list(request):
-
     user = request.user
+
+    # For private/public posts and only allowing admins view access
+    # Start with all posts
+    if user.is_staff:
+        posts = Post.objects.all()  # Admins see all posts
+    else:
+        posts = Post.objects.filter(Q(is_private=False) | Q(author=user))
+
 
     # For showing liked posts
     show_liked = request.GET.get("liked") == "true"  # Check if the user wants to filter liked posts
     if show_liked:
-        posts = Post.objects.filter(likes=user)  # Show only liked posts
-    else:
-        posts = Post.objects.all()  # Show all posts
+        posts = posts.filter(likes=user)  # Show only liked posts
+    
 
-
-    # For private/public posts and only allowing admins view access
-    if user.is_staff:  # Admins/Staff can see all posts
-        posts = Post.objects.all()
-    else:  # Regular users only see public posts or their own private posts
-        posts = Post.objects.filter(Q(is_private=False) | Q(author=user))
-
-    #Followed users only
-    followed_users = Follow.objects.filter(follower=request.user).values_list('following', flat=True)
-    posts = Post.objects.filter(author__id__in=followed_users).order_by('-created_at')
+    # # Followed users only
+    # followed_users = Follow.objects.filter(follower=user).values_list('following', flat=True)
+    # posts = posts.filter(Q(author__id__in=followed_users) | Q(author=user))  # Show followed users and own posts
 
     # Sort logic
-    user_id = request.GET.get('user')
     sort_by = request.GET.get('sort', '-created_at')
+    posts = posts.order_by(sort_by) #to order posts
 
-
-    posts = Post.objects.all().order_by(sort_by) #to order posts
+    # User Filter
+    user_id = request.GET.get('user')
     users = User.objects.all()
 
     if user_id:
         posts = posts.filter(author_id = user_id)
 
+    # Pagination
     paginator = Paginator(posts, 5) # Going to be showing 5 posts per page
-
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
 
-    return render(request, 'index.html', {'posts': posts, 'users': users, 'show_liked': show_liked})
+    return render(request, 'index.html', {'posts': posts, 'show_liked': show_liked})
 
 @login_required
 def post_detail(request, post_id):
