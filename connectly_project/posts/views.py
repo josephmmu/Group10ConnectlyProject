@@ -26,18 +26,60 @@ from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied
 from posts.forms import PostForm
 
+from django.db.models import Q
+
 # function to run gui site
+
+@login_required
+def liked_posts(request):
+    user = request.user  # Get the currently logged-in user
+    liked_posts = Post.objects.filter(likes=user)  # Filter posts the user liked
+    return render(request, "liked_posts.html", {"posts": liked_posts})
+
+@login_required
+def toggle_privacy(request, post_id):
+    post = get_object_or_404(Post, id=post_id, author=request.user)
+    post.is_private = not post.is_private
+    post.save()
+    return redirect("post-list")
+
 
 # List of Posts Page
 @login_required
 def post_list(request):
-    posts = Post.objects.all() #to order posts
+
+    user = request.user
+
+    # For showing liked posts
+    show_liked = request.GET.get("liked") == "true"  # Check if the user wants to filter liked posts
+    if show_liked:
+        posts = Post.objects.filter(likes=user)  # Show only liked posts
+    else:
+        posts = Post.objects.all()  # Show all posts
+
+
+    # For private/public posts and only allowing admins view access
+    if user.is_staff:  # Admins/Staff can see all posts
+        posts = Post.objects.all()
+    else:  # Regular users only see public posts or their own private posts
+        posts = Post.objects.filter(Q(is_private=False) | Q(author=user))
+
+    # Sort logic
+    user_id = request.GET.get('user')
+    sort_by = request.GET.get('sort', '-created_at')
+
+    posts = Post.objects.all().order_by(sort_by) #to order posts
+    users = User.objects.all()
+
+    if user_id:
+        posts = posts.filter(author_id = user_id)
+
     paginator = Paginator(posts, 5) # Going to be showing 5 posts per page
 
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
 
-    return render(request, 'index.html', {'posts': posts})
+    return render(request, 'index.html', {'posts': posts, 'users': users, 'show_liked': show_liked})
 
 @login_required
 def post_detail(request, post_id):

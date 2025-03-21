@@ -4,12 +4,47 @@
 {% block title %}Home - My Blog{% endblock %}
 
 {% block content %}
+
+<!-- {% for post in posts %}
+    <h2>{{ post.title }}</h2>
+    <p>Liked by: {{ post.author.username }}</p>
+{% endfor %} -->
+
     <h1>Posts</h1>
         <ul id="post-list">
+
+            <!-- Filter and Sort code -->
+            <form method="GET" action="">
+                <!-- Filter by user -->
+                <label for="user">Filter by User:</label>
+                <input type="text" name="user" id="user" placeholder="Enter user ID" value="{{ request.GET.user }}">
+            
+                <!-- Sorting options -->
+                <label for="sort">Sort By:</label>
+                <select name="sort" id="sort">
+                    <option value="-created_at" {% if request.GET.sort == "-created_at" %}selected{% endif %}>Newest First</option>
+                    <option value="created_at" {% if request.GET.sort == "created_at" %}selected{% endif %}>Oldest First</option>
+                </select>
+            
+                <!-- Submit button -->
+                <button type="submit">Apply</button>
+            </form>
+
+            <!-- Code to display Posts -->
             {% for post in posts %}
+                {% if post.author == request.user %}
+                    <form action="{% url 'toggle_privacy' post.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit">
+                            {% if post.is_private %} Make Public {% else %} Make Private {% endif %}
+                        </button>
+                    </form>
+                {% endif %}
+
                 <div class="post-header">
                     <h2>{{ post.title }}</h2>
-                    <p> @{{post.author }}</p>
+                    <p> @{{post.author }}  id: {{ post.author.id }}</p>
+                    <p> </p>
                 </div>
                 
                 <p>╔════════════════════╗</p>

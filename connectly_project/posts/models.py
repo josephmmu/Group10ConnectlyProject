@@ -15,6 +15,7 @@ class Post (models.Model):
     post_type = models.CharField(max_length=10, choices=POST_TYPES.items(), default='text')
     title = models.CharField(max_length=255, default='defaulttitle')  # Title field added
     content = models.TextField(blank=True, null=True)
+    is_private = models.BooleanField(default=False)  # New field
     likes = models.ManyToManyField(User, related_name="liked_posts", blank=True)
     metadata = models.JSONField(default=dict, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

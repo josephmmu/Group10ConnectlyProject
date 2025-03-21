@@ -6,7 +6,7 @@ from .views import UserViewSet, CommentViewSet
 from rest_framework.authtoken.views import obtain_auth_token
 from .views import login_view, logout_view, like_post, post_detail
 
-from .views import post_list, edit_posts, delete_post
+from .views import post_list, edit_posts, delete_post , toggle_privacy
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename = 'user')
@@ -29,7 +29,7 @@ urlpatterns = [
     path('post/<int:post_id>/like/', like_post, name="like_post"),
 
     path("post/<int:post_id>/edit/", edit_posts, name="edit_post"),
-    path("post/<int:post_id>/delete/", delete_post, name="delete_post")
+    path("post/<int:post_id>/delete/", delete_post, name="delete_post"),
 
-
+    path('toggle-privacy/<int:post_id>/', views.toggle_privacy, name ='toggle_privacy'),
 ]
