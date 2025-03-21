@@ -3,6 +3,19 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+class Follow(models.Model):
+    follower = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)
+    following = models.ForeignKey(User, related_name="followers", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'following')
+
+    
+    def __str__(self):
+        return f"{self.follower} follows {self.following}"
+
+
 class Post (models.Model):
 
     POST_TYPES = {
@@ -11,7 +24,7 @@ class Post (models.Model):
         'video': 'Video Post'
     }
 
-    author = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     post_type = models.CharField(max_length=10, choices=POST_TYPES.items(), default='text')
     title = models.CharField(max_length=255, default='defaulttitle')  # Title field added
     content = models.TextField(blank=True, null=True)

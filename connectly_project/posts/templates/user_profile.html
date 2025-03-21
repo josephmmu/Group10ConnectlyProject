@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ user_profile.username }}'s Profile</h2>
+    <p>Followers: {{ user_profile.followers.count }}</p>
+    <p>Following: {{ user_profile.following.count }}</p>
+
+    {% if request.user != user_profile %}
+        <form action="{% url 'follow_user' user_profile.id %}" method="POST">
+            {% csrf_token %}
+            {% if is_following %}
+                <button type="submit">Unfollow</button>
+            {% else %}
+                <button type="submit">Follow</button>
+            {% endif %}
+        </form>
+    {% endif %}
+
+    <h3>Posts by {{ user_profile.username }}</h3>
+    {% for post in posts %}
+        <div>
+            <p>{{ post.content }}</p>
+            <small>Posted on {{ post.created_at }}</small>
+        </div>
+    {% endfor %}
+{% endblock %}

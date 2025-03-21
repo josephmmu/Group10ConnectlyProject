@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import viewsets, status
-from .models import Post, Comment   
+from .models import Post, Comment, Follow
 from .serializers import UserSerializer, PostSerializer, CommentSerializer
 
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
@@ -29,7 +29,49 @@ from posts.forms import PostForm
 from django.db.models import Q
 
 # function to run gui site
+@login_required
+def user_profile(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    posts = Post.objects.filter(author=user).order_by('-created_at')  # Fetch user's posts
+    is_following = Follow.objects.filter(follower=request.user, following=user).exists()
 
+    context = {
+        "user_profile": user,
+        "posts": posts,
+        "is_following": is_following,
+    }
+    return render(request, "user_profile.html", context)
+
+
+@login_required
+def follow_user(request, user_id):
+    user_to_follow = get_object_or_404(User, id=user_id)
+
+     # Prevent users from following/unfollowing themselves
+    if request.user == user_to_follow:
+        return redirect('user_profile', user_id=user_id)
+
+    # Check if the user is already following
+    follow_instance = Follow.objects.filter(follower=request.user, following=user_to_follow).first()
+
+    if follow_instance:
+        # If the follow instance exists, delete it (Unfollow)
+        follow_instance.delete()
+    else:
+        # Otherwise, create a new follow instance (Follow)
+        Follow.objects.create(follower=request.user, following=user_to_follow)
+
+    return redirect('user_profile', user_id=user_id)
+
+
+@login_required
+def unfollow_user(request, user_id):
+    user_to_unfollow = get_object_or_404(User, id=user_id)
+    Follow.objects.filter(follower=request.user, following=user_to_unfollow).delete()
+    return redirect("user_profile", user_id=user_id)
+
+
+# Showing liked posts
 @login_required
 def liked_posts(request):
     user = request.user  # Get the currently logged-in user
@@ -64,9 +106,14 @@ def post_list(request):
     else:  # Regular users only see public posts or their own private posts
         posts = Post.objects.filter(Q(is_private=False) | Q(author=user))
 
+    #Followed users only
+    followed_users = Follow.objects.filter(follower=request.user).values_list('following', flat=True)
+    posts = Post.objects.filter(author__id__in=followed_users).order_by('-created_at')
+
     # Sort logic
     user_id = request.GET.get('user')
     sort_by = request.GET.get('sort', '-created_at')
+
 
     posts = Post.objects.all().order_by(sort_by) #to order posts
     users = User.objects.all()

@@ -43,7 +43,8 @@
 
                 <div class="post-header">
                     <h2>{{ post.title }}</h2>
-                    <p> @{{post.author }}  id: {{ post.author.id }}</p>
+                    <a href="{% url 'user_profile' post.author.id %}">@{{ post.author.username }}</a>
+                    <p>id: {{ post.author.id }}</p>
                     <p> </p>
                 </div>
                 
