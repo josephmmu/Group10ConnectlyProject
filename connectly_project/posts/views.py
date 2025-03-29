@@ -207,7 +207,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         """ Allows anyone to create a user, but require admin for updates."""
         if self.action == 'create':
-            return [IsAuthenticated()]
+            return []
         return [IsAdminUser()]
 
 class PostViewSet(viewsets.ModelViewSet):

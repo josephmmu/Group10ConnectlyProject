@@ -58,11 +58,17 @@ INSTALLED_APPS = [
     'django_extensions',
     'posts',
     'rest_framework.authtoken',
-    'corsheaders'
+    'corsheaders',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google'
 ]
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 REST_FRAMEWORK = {
@@ -75,6 +81,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    "allauth.account.middleware.AccountMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -84,6 +91,25 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware'
 ]
+
+# Provider specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': '891778856824-08746ikdamt830ib7vu1f8lpn8l4rv0m.apps.googleusercontent.com',
+            'secret': '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',
+            'key': ''
+        }
+    }
+}
+
+LOGIN_REDIRECT_URL = 'post-list'
+LOGOUT_REDIRECT_URL = 'login'
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -100,6 +126,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
             ],
         },
     },

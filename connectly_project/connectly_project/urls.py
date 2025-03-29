@@ -21,6 +21,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')), #DRF Login/Logout
 
+    path('accounts/', include('allauth.urls')),
+
     # THIS IS THE START OF THE URL for example
     # TO GET POSTS, it was https://127.0.0.1:8000/posts/posts/ but now its just https://127.0.0.1:8000/posts/
     path("" , include('posts.urls'))
