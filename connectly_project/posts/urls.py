@@ -20,7 +20,7 @@ urlpatterns = [
 
     # Token URL
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
-
+    
     path('posts/', post_list, name="post-list"),
 
     path('login/', login_view, name="login"),

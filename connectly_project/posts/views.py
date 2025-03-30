@@ -24,7 +24,7 @@ from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 
 from django.core.exceptions import PermissionDenied
-from posts.forms import PostForm
+from posts.forms import PostForm, CommentForm
 
 from django.db.models import Q
 
@@ -80,9 +80,17 @@ def liked_posts(request):
 
 @login_required
 def toggle_privacy(request, post_id):
-    post = get_object_or_404(Post, id=post_id, author=request.user)
-    post.is_private = not post.is_private
-    post.save()
+    # Try to get the post without filtering based on privacy
+    post = get_object_or_404(Post, id=post_id)
+
+    # Allow admins to toggle any post
+    if request.user.is_staff or post.author == request.user:
+        post.is_private = not post.is_private
+        post.save()
+    else:
+        # Redirect if the user is not allowed
+        return redirect("post-list") 
+
     return redirect("post-list")
 
 
@@ -98,6 +106,21 @@ def post_list(request):
     else:
         posts = Post.objects.filter(Q(is_private=False) | Q(author=user))
 
+
+    form = CommentForm()
+
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            post_id = request.POST.get('post_id')
+            post = get_object_or_404(Post, id = post_id)
+            comment = form.save(commit = False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
+            return redirect('post-list')
+        
+            
 
     # For showing liked posts
     show_liked = request.GET.get("liked") == "true"  # Check if the user wants to filter liked posts
@@ -125,7 +148,7 @@ def post_list(request):
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
 
-    return render(request, 'index.html', {'posts': posts, 'show_liked': show_liked})
+    return render(request, 'index.html', {'posts': posts, 'show_liked': show_liked, 'form': form})
 
 @login_required
 def post_detail(request, post_id):

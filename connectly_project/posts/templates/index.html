@@ -14,7 +14,7 @@
         <ul id="post-list">
 
             <!-- Filter and Sort code -->
-            <form method="GET" action="">
+            <form method="GET" action=""> 
                 <!-- Filter by user -->
                 <label for="user">Filter by User:</label>
                 <input type="text" name="user" id="user" placeholder="Enter user ID" value="{{ request.GET.user }}">
@@ -32,7 +32,7 @@
 
             <!-- Code to display Posts -->
             {% for post in posts %}
-                {% if post.author == request.user %}
+                {% if post.author == request.user or request.user.is_staff %}
                     <form action="{% url 'toggle_privacy' post.id %}" method="POST">
                         {% csrf_token %}
                         <button type="submit">
@@ -48,11 +48,11 @@
                     <p> </p>
                 </div>
                 
-                <p>╔════════════════════╗</p>
+                <p>╔═══════════════════════════════════════════════╗</p>
                 <br>
                 <p>{{ post.content }}</p>
                 <br>
-                <p>╚════════════════════╝</p>
+                <p>╚═══════════════════════════════════════════════╝</p>
 
                 <br>
 
@@ -62,15 +62,34 @@
                 <h3>Comments:</h3>
                 <ul>
                     {% for comment in post.comments.all %}
-                        <li>{{ comment.author }}: {{ comment.text }}</li>
-                    {% empty %}
-                        <li>No comments yet.</li>
+                        <div class="comment">
+                            <p><strong>{{ comment.author.username }}</strong>: {{ comment.text }}</p>
+                            <small>{{ comment.created_at }}</small>
+                        </div>
+                        {% empty %}
+                        <p>No comments yet. Be the first to comment!</p>
                     {% endfor %}
+
+                        <!-- Comment Form -->
+                    {% if user.is_authenticated %}
+                    <form method="POST">
+                        {% csrf_token %}
+                            <input type="hidden" name="post_id" value="{{ post.id }}">
+                        {{ form.as_p }}
+                        <button type="submit">Post Comment</button>
+                    </form>
+                    {% else %}
+                        <p><a href="{% url 'login' %}">Log in</a> to post a comment.</p>
+                    {% endif %}
+
                 </ul>
-                <p>☼ ════════════════════ ☼  </p>
+                <p>☼ ════════════════════════════════════════════════════════════════ ☼  </p>
             {% empty %}
                 <p>No posts available.</p>
             {% endfor %}
+
+
+            
         </ul>
 
         <div class="pagination">
